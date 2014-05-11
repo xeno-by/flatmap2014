@@ -1,7 +1,7 @@
 package flatmap
 
 import scalaz._
-import scalaz.syntax.id._
+import scalaz.syntax.either._
 
 object ZipCodeService {
 
