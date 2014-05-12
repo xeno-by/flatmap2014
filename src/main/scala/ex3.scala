@@ -22,6 +22,7 @@ object Exercise3 {
     // Task 2: Write convenience functions for each operation.
 
     def readLine: TerminalIO[String] = lift(ReadLine)
+    def writeLine = ???
 
 
     def run[A, M[_] : Monad](tio: TerminalIO[A])(interpreter: Terminal ~> M): M[A] = tio.foldMap[M](new (TerminalCoyo ~> M) {
