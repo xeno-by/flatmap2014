@@ -1,30 +1,54 @@
 package flatmap
 
 import scalaz._
+import scalaz.syntax.validation._
+import scalaz.std.list._
 
 object Exercise2 {
 
   // Task 1: You get a list of `Validation`s. If all are successes, return a list of the values.
   // If at least one is a failure, return the list of all failures.
   
-  def insideOut[A, B](list: List[Validation[A, B]]): Validation[List[A], List[B]] =
-    ???
+  def insideOut[A, B](list: List[Validation[A, B]]): Validation[List[A], List[B]] = list match {
+    case Nil =>
+      Nil.success
+    case h :: t =>
+      (h, insideOut(t)) match {
+        case (Success(h), Success(t)) => (h :: t).success
+        case (Success(h), Failure(t)) => t.failure
+        case (Failure(h), Success(_)) => List(h).failure
+        case (Failure(h), Failure(t)) => (h :: t).failure
+      }
+  }
 
   // Task 2: Notice how in Task 1 the error type changed? Maybe there is another variant
   // of the above function which doesn't do that ...
 
-  def insideOutNoChange[A : Semigroup, B](list: List[Validation[A, B]]): Validation[A, List[B]] =
-    ???
+  def insideOutNoChange[A : Semigroup, B](list: List[Validation[A, B]]): Validation[A, List[B]] = list match {
+    case Nil =>
+      Nil.success
+    case h :: t =>
+      (h, insideOutNoChange(t)) match {
+        case (Success(h), Success(t)) => (h :: t).success
+        case (Success(h), Failure(t)) => t.failure
+        case (Failure(h), Success(_)) => h.failure
+        case (Failure(h), Failure(t)) => Semigroup[A].append(h, t).failure
+      }
+  }
 
   // Task 3: Now, can we use Task 2 to implement Task 1?
 
   def insideOut2[A, B](list: List[Validation[A, B]]): Validation[List[A], List[B]] =
-    ???
+    insideOutNoChange(list.map(_.leftMap(_ :: Nil)))
 
   // Task 4: Okay, what about Task 2, but for Option?
   // Can you spot the pattern?
 
-  def insideOutOption[A](list: List[Option[A]]): Option[List[A]] =
-    ???
+  def insideOutOption[A](list: List[Option[A]]): Option[List[A]] = list match {
+    case Nil =>
+      Some(Nil)
+    case h :: t =>
+      for { hh <- h; tt <- insideOutOption(t) } yield hh :: tt
+  }
 
 }
