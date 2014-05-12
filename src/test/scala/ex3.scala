@@ -11,8 +11,10 @@ object Exercise3Spec extends Properties("exercise3") {
   import Exercise3._
 
   property("read/write") = forAll { (s: String, out: List[String]) =>
-    // something with readLine and writeLine
-    false
+    val program = Terminal.readLine >>= Terminal.writeLine
+    val init = Mock(in = List(s), out = out)
+    val expected = Mock(in = Nil, out = s :: out)
+    Terminal.run(program)(terminalToState).exec(init) == expected
   }
 
 }
